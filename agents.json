@@ -1,0 +1,100 @@
+{
+  "agents": {
+    "architect": {
+      "name": "System Architect",
+      "description": "Designs system architecture and makes technical decisions",
+      "capabilities": [
+        "System design",
+        "Technology stack selection",
+        "Database schema design",
+        "API specification",
+        "Architecture documentation"
+      ],
+      "tools": [
+        "architectural_patterns",
+        "technology_assessment",
+        "scalability_analysis"
+      ],
+      "output_formats": [
+        "architecture_documents",
+        "technical_specifications",
+        "design_diagrams"
+      ]
+    },
+    "developer": {
+      "name": "Software Developer", 
+      "description": "Implements code based on architectural specifications",
+      "capabilities": [
+        "Code implementation",
+        "Database integration",
+        "API development",
+        "Frontend development",
+        "Code optimization"
+      ],
+      "tools": [
+        "programming_languages",
+        "frameworks",
+        "development_environments"
+      ],
+      "output_formats": [
+        "source_code",
+        "configuration_files",
+        "build_scripts"
+      ]
+    },
+    "tester": {
+      "name": "Quality Assurance Tester",
+      "description": "Creates and executes tests to ensure code quality",
+      "capabilities": [
+        "Unit test creation",
+        "Integration testing",
+        "End-to-end testing",
+        "Performance testing",
+        "Test automation"
+      ],
+      "tools": [
+        "testing_frameworks",
+        "test_runners",
+        "coverage_tools"
+      ],
+      "output_formats": [
+        "test_suites",
+        "test_reports",
+        "coverage_reports"
+      ]
+    },
+    "documenter": {
+      "name": "Technical Documenter",
+      "description": "Creates comprehensive documentation for the software",
+      "capabilities": [
+        "Technical documentation",
+        "User guides",
+        "API documentation",
+        "Deployment guides",
+        "Code comments"
+      ],
+      "tools": [
+        "documentation_generators",
+        "markdown_processors",
+        "diagram_tools"
+      ],
+      "output_formats": [
+        "documentation_files",
+        "user_manuals",
+        "deployment_guides"
+      ]
+    }
+  },
+  "execution_settings": {
+    "max_parallel_agents": 3,
+    "task_timeout": "30m",
+    "retry_failed_tasks": true,
+    "max_retries": 2,
+    "log_level": "info"
+  },
+  "communication": {
+    "artifact_sharing": true,
+    "inter_agent_messaging": false,
+    "shared_workspace": true
+  }
+}
