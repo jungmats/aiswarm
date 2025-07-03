@@ -6,16 +6,18 @@ A powerful bash-based agent swarm system that generates complete software applic
 
 **Current Implementation:** This framework features **intelligent requirements analysis and dynamic task planning** with AI-powered code generation. The system automatically detects application domains, complexity levels, and generates tailored solutions.
 
-**AI Integration:** Built-in support for Claude API enables context-aware code generation. The framework gracefully falls back to sophisticated templates when AI is not available.
+**AI Integration:** Built-in support for Claude API enables context-aware code generation for all application components including architecture, implementation, testing, documentation, and business analysis.
 
-**Quick AI Setup:**
+**Required AI Setup:**
 ```bash
-# Set your Claude API key (optional but recommended)
+# Set your Claude API key (REQUIRED)
 export CLAUDE_API_KEY="sk-ant-api03-your-key-here"
 
-# The system automatically uses AI when available
+# Run the system with AI-powered generation
 ./swarm_parallel.sh agents_enhanced.json my_spec.txt --parallel
 ```
+
+**⚠️ Note:** Claude API key is mandatory. The framework relies entirely on AI-powered generation for optimal results.
 
 ## 🚀 Features
 
@@ -32,8 +34,10 @@ export CLAUDE_API_KEY="sk-ant-api03-your-key-here"
 
 ## 📋 Prerequisites
 
+- **Claude API Key** - Required for AI-powered generation
 - **Bash 4.0+** (macOS/Linux)
 - **jq** - JSON processor for parsing configurations
+- **curl** - For API communication with Claude
 - **chmod** - For setting executable permissions
 
 ### Install Prerequisites
@@ -55,7 +59,17 @@ sudo apt install jq
 
 **On CentOS/RHEL:**
 ```bash
-sudo yum install jq
+sudo yum install jq curl
+```
+
+**Get Claude API Key:**
+1. Sign up at [Claude.ai](https://claude.ai) or [Anthropic Console](https://console.anthropic.com)
+2. Generate an API key
+3. Export it in your environment:
+```bash
+export CLAUDE_API_KEY="sk-ant-api03-your-key-here"
+# Add to ~/.bashrc or ~/.zshrc for persistence
+echo 'export CLAUDE_API_KEY="sk-ant-api03-your-key-here"' >> ~/.bashrc
 ```
 
 ## 🛠️ Installation
@@ -790,12 +804,13 @@ export LOG_LEVEL=debug
 
 ## 🚀 Getting Started Checklist
 
-- [ ] Install prerequisites (bash, jq)
+- [ ] Install prerequisites (bash, jq, curl)
+- [ ] **Get Claude API key from Anthropic (REQUIRED)**
+- [ ] **Set Claude API key: `export CLAUDE_API_KEY="your-key"`**
 - [ ] Download/clone the agent swarm framework  
 - [ ] Set executable permissions on scripts
 - [ ] Use included `agents_enhanced.json` configuration (or customize)
 - [ ] Write your application specification for ANY domain
-- [ ] Set Claude API key (optional): `export CLAUDE_API_KEY="your-key"`
 - [ ] Run `./swarm_parallel.sh agents_enhanced.json your_spec.txt --parallel`
 - [ ] Review generated domain-specific project in `workspace/artifacts/project/`
 - [ ] Deploy with Docker or manually install dependencies
