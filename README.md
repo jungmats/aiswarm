@@ -2,28 +2,32 @@
 
 A powerful bash-based agent swarm system that generates complete software applications via coordinated specialized agents. The system analyzes specifications and autonomously plans, designs, implements, tests, and documents applications through a multi-agent architecture.
 
-## 🤖 **Important: AI Integration**
+## 🤖 **AI-Powered Intelligence**
 
-**Current Implementation:** This framework demonstrates the **agent coordination and task planning concepts** using template-based code generation. While it produces working applications, the agents use predefined templates rather than dynamic AI generation.
+**Current Implementation:** This framework features **intelligent requirements analysis and dynamic task planning** with AI-powered code generation. The system automatically detects application domains, complexity levels, and generates tailored solutions.
 
-**For True AI Power:** See [AI_INTEGRATION.md](AI_INTEGRATION.md) for instructions on integrating with Claude API or other AI systems to enable intelligent, specification-aware code generation.
+**AI Integration:** Built-in support for Claude API enables context-aware code generation. The framework gracefully falls back to sophisticated templates when AI is not available.
 
 **Quick AI Setup:**
 ```bash
-# Set your Claude API key
+# Set your Claude API key (optional but recommended)
 export CLAUDE_API_KEY="sk-ant-api03-your-key-here"
 
-# Use AI-enhanced agents (coming soon)
-./swarm_ai.sh agents.json my_spec.txt --ai-enabled
+# The system automatically uses AI when available
+./swarm_parallel.sh agents_enhanced.json my_spec.txt --parallel
 ```
 
 ## 🚀 Features
 
-- **Multi-Agent Coordination** - Specialized agents (architect, developer, tester, documenter) work together
-- **Intelligent Task Planning** - Automatically breaks down specifications into executable tasks with dependencies
-- **Complete Code Generation** - Produces working, deployable applications
-- **Comprehensive Logging** - Tracks all agent activities with inputs/outputs for full transparency
-- **Flexible Architecture** - Easy to extend with new agent types and capabilities
+- **Intelligent Requirements Analysis** - Automatically detects application domain, complexity, and features
+- **Universal Application Support** - Generates any type of application (e-commerce, project management, healthcare, etc.)
+- **AI-Powered Code Generation** - Uses Claude API for context-aware, domain-specific code generation
+- **Business Analysis & Market Research** - Comprehensive business feasibility, market analysis, and competitive assessment
+- **Dynamic Task Planning** - Creates custom task plans based on requirements analysis
+- **Unified Agent Architecture** - Single intelligent executor handles all agent types
+- **Adaptive Technology Selection** - Recommends optimal tech stacks based on requirements
+- **Domain-Specific Output** - Generates tailored code, tests, and documentation for detected domain
+- **Comprehensive Logging** - Tracks all activities with full transparency
 - **Production Ready** - Generates Docker configurations, tests, and deployment guides
 
 ## 📋 Prerequisites
@@ -65,35 +69,35 @@ cd my-agent-swarm
 
 # Download the framework files (or git clone if available)
 # You'll need these files:
-# - swarm.sh (main orchestration script)
-# - lib/ (task planner, agent executor, logger)
-# - agents/ (specialized agent scripts)
+# - swarm_parallel.sh (main orchestration script)
+# - lib/ (intelligent task planner, unified agent executor, logger)
+# - agents/ (intelligent planner and unified agent executor)
 ```
 
-### 2. Set Up Directory Structure
+### 2. Set Up Executable Permissions
 
 ```bash
-# Create the framework structure
-mkdir -p {lib,agents,logs,workspace}
-
-# Make scripts executable
-chmod +x swarm.sh
-chmod +x agents/*.sh
+# The framework automatically creates necessary directories (logs/, workspace/)
+# Just ensure scripts are executable:
+chmod +x swarm_parallel.sh
+chmod +x agents/planner.sh  
+chmod +x agents/agent_executor.sh
 ```
 
 The framework structure should look like:
 ```
 agent-swarm/
-├── swarm.sh                 # Main orchestration script
+├── swarm_parallel.sh         # Main orchestration script (with parallel support)
+├── swarm.sh                  # Alternative sequential-only script
 ├── lib/
-│   ├── task_planner.sh      # Specification analysis & task breakdown
-│   ├── agent_executor.sh    # Agent coordination & execution
+│   ├── task_planner.sh       # Intelligent specification analysis & dynamic planning
+│   ├── agent_executor.sh     # Agent coordination & execution
+│   ├── parallel_executor.sh  # Parallel execution system
 │   └── logger.sh            # Comprehensive activity logging
 ├── agents/
-│   ├── architect.sh         # System architecture & design
-│   ├── developer.sh         # Code implementation
-│   ├── tester.sh           # Test creation & validation
-│   └── documenter.sh       # Documentation generation
+│   ├── planner.sh           # Intelligent requirements analyzer & task planner
+│   └── agent_executor.sh    # Unified AI-powered agent executor
+├── agents_enhanced.json     # Enhanced agent configuration with capabilities
 ├── logs/                   # Generated activity logs
 └── workspace/              # Generated projects and artifacts
 ```
@@ -116,64 +120,79 @@ Arguments:
 
 ## 📖 Quick Start Guide
 
-### Step 1: Create Agent Configuration
+### Step 1: Use Enhanced Agent Configuration
 
-Create `agents.json` with agent definitions:
+The framework includes `agents_enhanced.json` with intelligent agent definitions:
 
 ```json
 {
-  "agents": {
+  "agent_types": {
+    "planner": {
+      "name": "Intelligent Planner",
+      "description": "Analyzes requirements and creates dynamic task plans",
+      "capabilities": ["Requirements analysis", "Domain detection", "Task planning", "Agent assignment"],
+      "specializations": {
+        "domains": ["ecommerce", "project_management", "healthcare", "fintech", "social_platform"],
+        "complexity_levels": ["low", "medium", "high"],
+        "architectures": ["monolith", "microservices", "serverless"]
+      }
+    },
     "architect": {
-      "name": "System Architect",
-      "description": "Designs system architecture and makes technical decisions",
-      "capabilities": [
-        "System design",
-        "Technology stack selection", 
-        "Database schema design",
-        "API specification",
-        "Architecture documentation"
-      ]
+      "name": "System Architect", 
+      "description": "Designs system architecture with domain-specific expertise",
+      "capabilities": ["System design", "Technology selection", "Security architecture"],
+      "specializations": {
+        "patterns": ["mvc", "microservices", "event_driven"],
+        "databases": ["postgresql", "mongodb", "redis"],
+        "cloud_platforms": ["aws", "gcp", "azure", "docker"]
+      }
     },
     "developer": {
       "name": "Software Developer",
-      "description": "Implements code based on architectural specifications", 
-      "capabilities": [
-        "Code implementation",
-        "Database integration",
-        "API development",
-        "Frontend development",
-        "Code optimization"
-      ]
+      "description": "Implements code with AI-powered generation", 
+      "capabilities": ["Code implementation", "API development", "Authentication systems"],
+      "specializations": {
+        "languages": ["javascript", "typescript", "python"],
+        "frameworks": ["react", "express", "fastapi"],
+        "features": ["authentication", "payments", "real_time", "file_upload"]
+      }
     },
     "tester": {
       "name": "Quality Assurance Tester",
-      "description": "Creates and executes tests to ensure code quality",
-      "capabilities": [
-        "Unit test creation",
-        "Integration testing", 
-        "End-to-end testing",
-        "Performance testing",
-        "Test automation"
-      ]
+      "description": "Creates comprehensive test suites adapted to application domain",
+      "capabilities": ["Unit testing", "Integration testing", "E2E testing", "Performance testing"],
+      "specializations": {
+        "frameworks": ["jest", "cypress", "selenium", "playwright"]
+      }
     },
     "documenter": {
-      "name": "Technical Documenter", 
-      "description": "Creates comprehensive documentation for the software",
-      "capabilities": [
-        "Technical documentation",
-        "User guides",
-        "API documentation", 
-        "Deployment guides",
-        "Code comments"
-      ]
+      "name": "Technical Documenter",
+      "description": "Creates documentation tailored to application domain",
+      "capabilities": ["Technical docs", "User guides", "API documentation", "Deployment guides"],
+      "specializations": {
+        "formats": ["markdown", "html", "interactive"]
+      }
+    },
+    "business_analyst": {
+      "name": "Business Analyst",
+      "description": "Analyzes market potential, business risks, and feasibility",
+      "capabilities": ["Market research", "Competitive analysis", "Business model validation", "ROI analysis"],
+      "specializations": {
+        "domains": ["ecommerce", "fintech", "healthcare", "saas"],
+        "methodologies": ["swot_analysis", "business_model_canvas", "lean_canvas"]
+      }
     }
   },
   "execution_settings": {
-    "max_parallel_agents": 3,
-    "task_timeout": "30m",
-    "retry_failed_tasks": true,
-    "max_retries": 2,
-    "log_level": "info"
+    "max_parallel_agents": 4,
+    "intelligent_planning": true,
+    "dynamic_agent_assignment": true,
+    "adaptive_task_creation": true
+  },
+  "planning_settings": {
+    "enable_domain_detection": true,
+    "enable_complexity_analysis": true,
+    "enable_tech_stack_recommendation": true
   }
 }
 ```
@@ -228,16 +247,16 @@ SECURITY REQUIREMENTS:
 
 Choose your execution mode:
 
-**Sequential Execution (Default):**
+**Intelligent Analysis + Sequential Execution:**
 ```bash
-# Generate your application (one agent at a time)
-./swarm.sh agents.json my_app_spec.txt
+# Generate your application with intelligent planning (one agent at a time)
+./swarm_parallel.sh agents_enhanced.json my_app_spec.txt --sequential
 ```
 
-**Parallel Execution (Faster):**
+**Intelligent Analysis + Parallel Execution (Recommended):**
 ```bash
-# Generate your application (multiple agents simultaneously)  
-./swarm_parallel.sh agents.json my_app_spec.txt --parallel
+# Generate your application with intelligent planning (multiple agents simultaneously)  
+./swarm_parallel.sh agents_enhanced.json my_app_spec.txt --parallel
 ```
 
 **Execution Mode Comparison:**
@@ -250,21 +269,28 @@ Choose your execution mode:
 ### Step 4: Monitor Progress
 
 Watch the real-time output showing:
-- Specification analysis (2,000+ character specs processed)
-- Task breakdown into phases (Architecture → Implementation → Testing → Documentation)
-- Agent execution with live status updates
-- Task completion tracking
+- Intelligent specification analysis with domain detection
+- Dynamic task planning based on detected requirements
+- AI-powered agent execution with context-aware generation
+- Real-time progress tracking with domain-specific insights
 
 Example output:
 ```
 🚀 Initializing Agent Swarm System
+⚡ Parallel execution mode enabled
 ✅ Input files validated
 📋 Analyzing specification and planning tasks...
-[PLANNER] Task breakdown created with 15 total tasks
+[PLANNER] Starting intelligent task planning analysis
+[PLANNER] Using intelligent planner agent for dynamic analysis
+[planner_1234567] Domain detected: project_management
+[planner_1234567] Complexity assessed: high
+[planner_1234567] Features extracted: authentication, real_time, notifications
+[planner_1234567] Tech stack recommended: Node.js/Express + React + PostgreSQL
+[PLANNER] Dynamic task plan created with 15 domain-specific tasks
 🤖 Executing agent swarm...
-[1/15] Executing task...
-[TASK:arch_001] STARTED by architect: Analyze requirements and define system architecture
-[TASK:arch_001] COMPLETED by architect_12345: Duration: 1s
+[architect_1234567] Using unified agent executor for architecture task
+[developer_1234567] Using AI-powered code generation for project_management domain
+[tester_1234567] Creating domain-specific test suites
 ...
 🎉 Agent swarm execution completed!
 ```
@@ -279,15 +305,19 @@ cd workspace/artifacts/project
 # View project structure
 ls -la
 
-# Backend (Node.js/Express)
+# Backend (technology varies by domain/complexity)
 cd backend
 cat package.json
 ls src/
 
-# Frontend (React/TypeScript)  
+# Frontend (React/Vue/Angular - varies by requirements)  
 cd ../frontend
 cat package.json
 ls src/
+
+# Business Analysis (NEW!)
+cd ../business
+ls -la  # market_analysis.json, business_model_canvas.json, etc.
 
 # Documentation
 cd ../docs
@@ -361,7 +391,7 @@ EOF
 ### 2. Run the Agent Swarm
 
 ```bash
-./swarm.sh agents.json blog_spec.txt
+./swarm_parallel.sh agents_enhanced.json blog_spec.txt --parallel
 ```
 
 ### 3. What Gets Generated
@@ -590,10 +620,11 @@ FEATURES:
 
 ### Generated Project Structure
 
-Every application follows this pattern:
+The framework automatically adapts the project structure based on your application's domain and complexity. Here's what gets generated:
+
 ```
 workspace/artifacts/project/
-├── backend/              # API server
+├── backend/              # API server (technology varies by domain/complexity)
 │   ├── src/
 │   │   ├── controllers/  # HTTP request handlers
 │   │   ├── models/       # Database models
@@ -604,15 +635,20 @@ workspace/artifacts/project/
 │   ├── tests/            # Backend test suites
 │   ├── package.json      # Dependencies and scripts
 │   └── Dockerfile        # Container configuration
-├── frontend/             # React application
+├── frontend/             # Client application (React, Vue, or others)
 │   ├── src/
 │   │   ├── components/   # Reusable UI components
 │   │   ├── pages/        # Application pages
 │   │   ├── services/     # API integration
-│   │   ├── store/        # State management (Redux)
-│   │   └── types/        # TypeScript definitions
+│   │   ├── store/        # State management (varies by complexity)
+│   │   └── types/        # Type definitions (if TypeScript)
 │   ├── package.json      # Frontend dependencies
-│   └── vite.config.ts    # Build configuration
+│   └── build.config.*    # Build configuration (Vite, Webpack, etc.)
+├── business/             # Business analysis documents
+│   ├── market_analysis.json      # Market research and analysis
+│   ├── business_model_canvas.json # Business model framework
+│   ├── risk_assessment.json      # Risk analysis and mitigation
+│   └── user_personas.json        # Target user personas
 ├── docs/                 # Generated documentation
 │   ├── technical/        # Architecture guides
 │   ├── user/            # User manuals
@@ -621,6 +657,38 @@ workspace/artifacts/project/
 ├── docker-compose.yml    # Multi-service deployment
 └── README.md            # Project overview
 ```
+
+### Technology Stack Flexibility
+
+The framework **automatically selects the optimal technology stack** based on your application's domain, complexity, and scale requirements:
+
+#### Backend Technologies
+- **Low Complexity**: Node.js/Express with JavaScript
+- **Medium Complexity**: Node.js/Express with TypeScript
+- **High Complexity**: NestJS microservices or specialized frameworks
+- **Alternative Stacks**: Python/FastAPI, Java/Spring, Go/Gin (domain-dependent)
+
+#### Frontend Technologies
+- **Simple Apps**: React with CSS
+- **Medium Apps**: React with TypeScript + Material-UI/Tailwind
+- **Complex Apps**: Next.js, Vue.js, or Angular with advanced state management
+- **Analytics Apps**: React + D3.js/Chart.js for visualizations
+
+#### Database Selection
+- **Small Scale**: SQLite for simplicity
+- **Medium/Large Scale**: PostgreSQL for reliability
+- **Document Storage**: MongoDB for content-heavy applications
+- **Analytics**: ClickHouse or specialized time-series databases
+- **Search**: Elasticsearch for e-commerce and content platforms
+
+#### Specialized Domain Technologies
+- **E-commerce**: Stripe payments, inventory management, search engines
+- **Real-time Apps**: Socket.io, WebSocket support, Redis caching
+- **Healthcare**: HIPAA compliance, end-to-end encryption, audit logging
+- **FinTech**: Advanced security, OAuth2, compliance frameworks
+- **IoT**: MQTT messaging, InfluxDB time-series, Grafana monitoring
+
+The system intelligently combines these technologies to create the perfect stack for your specific needs.
 
 ### Logging and Tracking
 
@@ -638,13 +706,16 @@ tail -f logs/swarm_*_tasks.log
 
 ### Task Execution Flow
 
-The system follows this workflow:
+The system follows this comprehensive workflow:
 1. **Analysis Phase** - Parse specification and extract requirements
-2. **Planning Phase** - Break down into 15 coordinated tasks
-3. **Architecture Phase** - Design system architecture and data models
-4. **Implementation Phase** - Generate working code for backend and frontend
-5. **Testing Phase** - Create comprehensive test suites
-6. **Documentation Phase** - Generate user guides and technical docs
+2. **Business Analysis Phase** - Market research, competitive analysis, and feasibility assessment
+3. **Planning Phase** - Break down into coordinated tasks with optimal agent assignments
+4. **Architecture Phase** - Design system architecture and data models
+5. **Implementation Phase** - Generate working code for backend and frontend
+6. **Testing Phase** - Create comprehensive test suites
+7. **Documentation Phase** - Generate user guides and technical docs
+
+Each phase is intelligently adapted based on your application's domain, complexity, and scale requirements.
 
 ## 🔍 Troubleshooting
 
@@ -720,15 +791,28 @@ export LOG_LEVEL=debug
 ## 🚀 Getting Started Checklist
 
 - [ ] Install prerequisites (bash, jq)
-- [ ] Download/clone the agent swarm framework
+- [ ] Download/clone the agent swarm framework  
 - [ ] Set executable permissions on scripts
-- [ ] Create your `agents.json` configuration
-- [ ] Write your application specification
-- [ ] Run `./swarm.sh agents.json your_spec.txt`
-- [ ] Review generated project in `workspace/artifacts/project/`
+- [ ] Use included `agents_enhanced.json` configuration (or customize)
+- [ ] Write your application specification for ANY domain
+- [ ] Set Claude API key (optional): `export CLAUDE_API_KEY="your-key"`
+- [ ] Run `./swarm_parallel.sh agents_enhanced.json your_spec.txt --parallel`
+- [ ] Review generated domain-specific project in `workspace/artifacts/project/`
 - [ ] Deploy with Docker or manually install dependencies
 - [ ] Customize and extend the generated application
 
+## 🌟 **Universal Application Generation**
+
+The Agent Swarm Framework automatically detects your application domain and generates tailored solutions:
+
+- **E-commerce** → Product catalogs, shopping carts, payment integration
+- **Project Management** → Task tracking, team collaboration, dashboards  
+- **Healthcare** → Patient management, appointment scheduling, compliance
+- **Social Media** → User profiles, messaging, real-time features
+- **FinTech** → Account management, transactions, security
+- **IoT** → Device monitoring, data collection, automation
+- **And ANY other domain** you specify in your requirements
+
 ---
 
-**The Agent Swarm Framework transforms ideas into working software through coordinated AI agents. Start building your next application today!**
+**The Agent Swarm Framework transforms ANY idea into working software through intelligent AI agents. Start building your next application today!**

@@ -312,35 +312,139 @@ recommend_tech_stack() {
     
     local stack='{}'
     
-    # Backend selection
-    if [[ "$complexity" == "high" || "$scale" == "large" ]]; then
-        stack=$(echo "$stack" | jq ". + {\"backend\": \"node_express\", \"database\": \"postgresql\"}")
-    else
-        stack=$(echo "$stack" | jq ". + {\"backend\": \"node_express\", \"database\": \"postgresql\"}")
-    fi
+    # Backend selection based on complexity and scale
+    case "$complexity" in
+        "low")
+            if [[ "$scale" == "small" ]]; then
+                stack=$(echo "$stack" | jq ". + {\"backend\": \"express\", \"language\": \"javascript\"}")
+            else
+                stack=$(echo "$stack" | jq ". + {\"backend\": \"express\", \"language\": \"typescript\"}")
+            fi
+            ;;
+        "medium")
+            stack=$(echo "$stack" | jq ". + {\"backend\": \"express\", \"language\": \"typescript\"}")
+            ;;
+        "high")
+            if [[ "$scale" == "large" ]]; then
+                stack=$(echo "$stack" | jq ". + {\"backend\": \"microservices\", \"language\": \"typescript\", \"framework\": \"nestjs\"}")
+            else
+                stack=$(echo "$stack" | jq ". + {\"backend\": \"express\", \"language\": \"typescript\"}")
+            fi
+            ;;
+    esac
     
-    # Frontend selection based on complexity
-    if [[ "$complexity" == "high" ]]; then
-        stack=$(echo "$stack" | jq ". + {\"frontend\": \"react_typescript\"}")
-    else
-        stack=$(echo "$stack" | jq ". + {\"frontend\": \"react\"}")
-    fi
+    # Database selection based on domain and scale
+    case "$domain" in
+        "analytics"|"iot")
+            stack=$(echo "$stack" | jq ". + {\"database\": \"postgresql\", \"analytics_db\": \"clickhouse\"}")
+            ;;
+        "social_platform"|"content_management")
+            if [[ "$scale" == "large" ]]; then
+                stack=$(echo "$stack" | jq ". + {\"database\": \"postgresql\", \"document_store\": \"mongodb\"}")
+            else
+                stack=$(echo "$stack" | jq ". + {\"database\": \"postgresql\"}")
+            fi
+            ;;
+        "ecommerce")
+            stack=$(echo "$stack" | jq ". + {\"database\": \"postgresql\", \"search_engine\": \"elasticsearch\"}")
+            ;;
+        *)
+            if [[ "$scale" == "small" && "$complexity" == "low" ]]; then
+                stack=$(echo "$stack" | jq ". + {\"database\": \"sqlite\"}")
+            else
+                stack=$(echo "$stack" | jq ". + {\"database\": \"postgresql\"}")
+            fi
+            ;;
+    esac
     
-    # Additional services
-    if [[ "$scale" == "large" ]]; then
-        stack=$(echo "$stack" | jq ". + {\"cache\": \"redis\", \"queue\": \"bullmq\"}")
-    fi
+    # Frontend selection based on complexity and domain
+    case "$complexity" in
+        "low")
+            stack=$(echo "$stack" | jq ". + {\"frontend\": \"react\", \"styling\": \"css\"}")
+            ;;
+        "medium")
+            if [[ "$domain" == "analytics" ]]; then
+                stack=$(echo "$stack" | jq ". + {\"frontend\": \"react_typescript\", \"charts\": \"recharts\", \"styling\": \"tailwind\"}")
+            else
+                stack=$(echo "$stack" | jq ". + {\"frontend\": \"react_typescript\", \"styling\": \"material_ui\"}")
+            fi
+            ;;
+        "high")
+            case "$domain" in
+                "ecommerce")
+                    stack=$(echo "$stack" | jq ". + {\"frontend\": \"next_js\", \"styling\": \"tailwind\", \"state\": \"zustand\"}")
+                    ;;
+                "social_platform")
+                    stack=$(echo "$stack" | jq ". + {\"frontend\": \"react_typescript\", \"real_time\": \"socket_io_client\", \"styling\": \"chakra_ui\"}")
+                    ;;
+                *)
+                    stack=$(echo "$stack" | jq ". + {\"frontend\": \"react_typescript\", \"state\": \"redux_toolkit\", \"styling\": \"material_ui\"}")
+                    ;;
+            esac
+            ;;
+    esac
     
-    # Domain-specific additions
+    # Caching and performance based on scale
+    case "$scale" in
+        "small")
+            # No additional caching for small scale
+            ;;
+        "medium")
+            stack=$(echo "$stack" | jq ". + {\"cache\": \"redis\"}")
+            ;;
+        "large")
+            stack=$(echo "$stack" | jq ". + {\"cache\": \"redis\", \"queue\": \"bullmq\", \"cdn\": \"cloudflare\"}")
+            ;;
+    esac
+    
+    # Domain-specific technology additions
     case "$domain" in
         "ecommerce")
-            stack=$(echo "$stack" | jq ". + {\"payment\": \"stripe\", \"search\": \"elasticsearch\"}")
+            stack=$(echo "$stack" | jq ". + {\"payment\": \"stripe\", \"inventory\": \"warehouse_management\", \"email\": \"sendgrid\"}")
+            if [[ "$scale" != "small" ]]; then
+                stack=$(echo "$stack" | jq ". + {\"search\": \"elasticsearch\"}")
+            fi
             ;;
         "social_platform")
-            stack=$(echo "$stack" | jq ". + {\"real_time\": \"socket_io\", \"storage\": \"aws_s3\"}")
+            stack=$(echo "$stack" | jq ". + {\"real_time\": \"socket_io\", \"file_storage\": \"aws_s3\", \"notifications\": \"push_notifications\"}")
             ;;
         "analytics")
-            stack=$(echo "$stack" | jq ". + {\"visualization\": \"chart_js\", \"database\": \"postgresql\"}")
+            stack=$(echo "$stack" | jq ". + {\"visualization\": \"d3_js\", \"data_processing\": \"pandas\", \"api_analytics\": \"mixpanel\"}")
+            ;;
+        "fintech")
+            stack=$(echo "$stack" | jq ". + {\"security\": \"oauth2\", \"encryption\": \"bcrypt\", \"compliance\": \"audit_logging\", \"payment\": \"stripe_connect\"}")
+            ;;
+        "healthcare")
+            stack=$(echo "$stack" | jq ". + {\"security\": \"hipaa_compliance\", \"encryption\": \"end_to_end\", \"audit\": \"comprehensive_logging\"}")
+            ;;
+        "iot")
+            stack=$(echo "$stack" | jq ". + {\"messaging\": \"mqtt\", \"time_series\": \"influxdb\", \"monitoring\": \"grafana\"}")
+            ;;
+        "learning_management")
+            stack=$(echo "$stack" | jq ". + {\"video\": \"video_streaming\", \"progress_tracking\": \"xapi\", \"assessment\": \"quiz_engine\"}")
+            ;;
+        "project_management")
+            stack=$(echo "$stack" | jq ". + {\"real_time\": \"socket_io\", \"file_sharing\": \"file_upload\", \"notifications\": \"email_websocket\"}")
+            ;;
+    esac
+    
+    # Development and deployment tools
+    if [[ "$complexity" == "high" || "$scale" == "large" ]]; then
+        stack=$(echo "$stack" | jq ". + {\"containerization\": \"docker\", \"orchestration\": \"docker_compose\", \"monitoring\": \"prometheus\"}")
+    else
+        stack=$(echo "$stack" | jq ". + {\"containerization\": \"docker\"}")
+    fi
+    
+    # Testing strategy based on complexity
+    case "$complexity" in
+        "low")
+            stack=$(echo "$stack" | jq ". + {\"testing\": \"jest\"}")
+            ;;
+        "medium")
+            stack=$(echo "$stack" | jq ". + {\"testing\": \"jest\", \"e2e\": \"cypress\"}")
+            ;;
+        "high")
+            stack=$(echo "$stack" | jq ". + {\"testing\": \"jest\", \"e2e\": \"playwright\", \"api_testing\": \"supertest\"}")
             ;;
     esac
     
@@ -430,6 +534,45 @@ create_dynamic_task_plan() {
     }
   },
   "phases": {
+    "business_analysis": {
+      "phase_id": "business",
+      "description": "Business feasibility and market analysis",
+      "tasks": [
+        {
+          "task_id": "biz_001",
+          "title": "Market research and competitive analysis for $domain",
+          "description": "Analyze market size, competition, and opportunities for $domain application",
+          "agent_type": "business_analyst",
+          "priority": "high",
+          "dependencies": [],
+          "estimated_duration": "45m",
+          "inputs": ["requirements_document"],
+          "outputs": ["market_analysis", "competitive_landscape"]
+        },
+        {
+          "task_id": "biz_002", 
+          "title": "Business model and monetization strategy",
+          "description": "Define business model, revenue streams, and monetization approach for $domain",
+          "agent_type": "business_analyst",
+          "priority": "high",
+          "dependencies": ["biz_001"],
+          "estimated_duration": "30m",
+          "inputs": ["market_analysis"],
+          "outputs": ["business_model", "monetization_strategy"]
+        },
+        {
+          "task_id": "biz_003",
+          "title": "Risk assessment and feasibility analysis",
+          "description": "Identify business and technical risks, validate feasibility for $domain application",
+          "agent_type": "business_analyst",
+          "priority": "medium",
+          "dependencies": ["biz_002"],
+          "estimated_duration": "25m",
+          "inputs": ["business_model", "requirements_analysis"],
+          "outputs": ["risk_assessment", "feasibility_report"]
+        }
+      ]
+    },
     "architecture": {
       "phase_id": "arch",
       "description": "System architecture and design decisions",
@@ -440,9 +583,9 @@ create_dynamic_task_plan() {
           "description": "Create high-level system architecture optimized for $domain with $complexity complexity",
           "agent_type": "architect",
           "priority": "high",
-          "dependencies": [],
+          "dependencies": ["biz_003"],
           "estimated_duration": "30m",
-          "inputs": ["requirements_analysis"],
+          "inputs": ["requirements_analysis", "feasibility_report"],
           "outputs": ["system_architecture", "tech_stack_decisions"]
         },
         {
@@ -610,12 +753,14 @@ create_dynamic_task_plan() {
     }
   },
   "execution_order": [
+    "biz_001", "biz_002", "biz_003",
     "arch_001", "arch_002", "arch_003",
     "impl_001", "impl_002", "impl_003", "impl_004", "impl_005", 
     "test_001", "test_002", "test_003",
     "docs_001", "docs_002", "docs_003"
   ],
   "agent_assignments": {
+    "business_analyst": "business_analyst",
     "architect": "architect",
     "developer": "developer", 
     "tester": "tester",

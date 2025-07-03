@@ -270,6 +270,65 @@ Focus on $domain-specific workflows and use cases."
     generate_template_documentation "$domain" "$complexity" "$features"
 }
 
+# Function to execute business analyst tasks
+execute_business_analyst_task() {
+    local analysis="$1"
+    local agent_capabilities="$2"
+    
+    local domain=$(echo "$analysis" | jq -r '.requirements_summary.domain')
+    local complexity=$(echo "$analysis" | jq -r '.requirements_summary.complexity')
+    local features=$(echo "$analysis" | jq -r '.extracted_features // []')
+    local tech_stack=$(echo "$analysis" | jq -r '.recommended_stack // {}')
+    
+    echo "[$AGENT_ID] Executing business analysis task for $domain domain"
+    
+    # Create AI prompt for business analysis
+    local prompt="You are a senior business analyst and market researcher. Analyze the business potential and feasibility of a $domain application.
+
+Context:
+- Domain: $domain
+- Complexity: $complexity  
+- Features: $(echo "$features" | jq -r 'join(", ")')
+- Recommended Stack: $(echo "$tech_stack" | jq -c '.')
+
+Task: $DESCRIPTION
+
+Provide comprehensive business analysis including:
+1. Market size analysis and target audience identification
+2. Competitive landscape assessment with key players
+3. Business model recommendations (revenue streams, pricing strategy)
+4. Risk assessment (market, technical, financial, operational risks)
+5. User persona development and market segmentation
+6. Go-to-market strategy recommendations
+7. Financial projections and ROI analysis
+8. Feature prioritization based on market value
+
+Focus on $domain-specific market dynamics, industry trends, and business opportunities."
+    
+    # Try AI-powered generation first
+    local ai_response
+    if ai_response=$(call_claude_api "$prompt" 8000); then
+        if [[ -n "$ai_response" ]]; then
+            echo "[$AGENT_ID] Using AI-generated business analysis"
+            
+            # Parse and save AI response
+            echo "$ai_response" > "$ARTIFACTS_DIR/business_analysis.md"
+            
+            # Generate specific business analysis artifacts
+            generate_market_analysis "$domain" "$features"
+            generate_business_model_canvas "$domain" "$features"
+            generate_risk_assessment "$domain" "$complexity"
+            generate_user_personas "$domain" "$features"
+            
+            return 0
+        fi
+    fi
+    
+    # Fallback to template-based generation
+    echo "[$AGENT_ID] Using template-based business analysis generation"
+    generate_template_business_analysis "$domain" "$complexity" "$features" "$tech_stack"
+}
+
 # Template generation functions (fallbacks)
 generate_template_architecture() {
     local domain="$1"
@@ -945,6 +1004,415 @@ $(echo "$features" | jq -r '.[] | "- " + (. | gsub("_"; " ") | gsub("\\b\\w"; "\
 EOF
 }
 
+# Business Analysis Generation Functions
+generate_template_business_analysis() {
+    local domain="$1"
+    local complexity="$2"
+    local features="$3"
+    local tech_stack="$4"
+    
+    cat > "$ARTIFACTS_DIR/business_analysis.md" << EOF
+# Business Analysis - $domain Application
+
+## Executive Summary
+$complexity complexity $domain application with comprehensive market potential and strategic business value.
+
+## Market Analysis
+### Target Market
+$(case "$domain" in
+    "ecommerce") echo "- Online retail market with growing e-commerce adoption
+- Small to medium businesses seeking digital transformation
+- Target audience: Online shoppers and business owners" ;;
+    "project_management") echo "- Project management software market
+- Teams and organizations seeking productivity tools
+- Target audience: Project managers, team leads, remote teams" ;;
+    "healthcare") echo "- Digital healthcare and medical technology market
+- Healthcare providers and patients seeking digital solutions
+- Target audience: Medical professionals, patients, healthcare administrators" ;;
+    "fintech") echo "- Financial technology and digital banking market
+- Consumers and businesses seeking financial services
+- Target audience: Bank customers, financial service users" ;;
+    *) echo "- General software application market
+- Businesses and consumers seeking digital solutions
+- Target audience: End users in $domain sector" ;;
+esac)
+
+### Market Size
+- Total Addressable Market (TAM): Large and growing
+- Serviceable Addressable Market (SAM): Significant opportunity
+- Serviceable Obtainable Market (SOM): Achievable with proper execution
+
+## Competitive Analysis
+### Key Competitors
+$(case "$domain" in
+    "ecommerce") echo "- Shopify, WooCommerce, Magento
+- Strengths: Established platforms, large ecosystems
+- Weaknesses: Complexity, high costs for advanced features" ;;
+    "project_management") echo "- Jira, Trello, Asana, Monday.com
+- Strengths: Feature-rich, established user bases
+- Weaknesses: Complexity, pricing, learning curve" ;;
+    "healthcare") echo "- Epic, Cerner, Allscripts
+- Strengths: Comprehensive systems, regulatory compliance
+- Weaknesses: High costs, complexity, poor user experience" ;;
+    *) echo "- Various established players in $domain market
+- Strengths: Market presence, feature completeness
+- Weaknesses: Innovation gaps, user experience issues" ;;
+esac)
+
+### Competitive Advantages
+- Modern technology stack: $(echo "$tech_stack" | jq -r '.frontend // "Modern"') frontend with $(echo "$tech_stack" | jq -r '.backend // "scalable"') backend
+- User-centric design focused on $domain workflows
+- Competitive pricing model
+- Faster time-to-value for users
+
+## Business Model
+### Revenue Streams
+$(case "$domain" in
+    "ecommerce") echo "- Transaction fees (2-3% per sale)
+- Monthly subscription plans (\$29-\$299/month)
+- Premium features and add-ons
+- Payment processing revenue sharing" ;;
+    "project_management") echo "- Subscription-based pricing (\$10-\$25/user/month)
+- Freemium model with usage limits
+- Enterprise licensing for large organizations
+- Professional services and consulting" ;;
+    "healthcare") echo "- SaaS subscription model (\$50-\$500/provider/month)
+- Per-patient or per-visit pricing
+- Integration and implementation services
+- Compliance and training services" ;;
+    *) echo "- Subscription-based model (\$20-\$100/month)
+- Freemium tier with premium upgrades
+- Enterprise and custom solutions
+- Professional services and support" ;;
+esac)
+
+### Pricing Strategy
+- Competitive pricing compared to existing solutions
+- Value-based pricing aligned with customer ROI
+- Clear pricing tiers for different user segments
+
+## Risk Assessment
+### Market Risks
+- Competition from established players
+- Market saturation in certain segments
+- Economic downturn affecting spending
+
+### Technical Risks
+$(case "$complexity" in
+    "high") echo "- Complex architecture requiring skilled development team
+- Integration challenges with third-party services
+- Scalability requirements for growth" ;;
+    "medium") echo "- Moderate technical complexity
+- Integration requirements with existing systems
+- Performance optimization needs" ;;
+    *) echo "- Standard technical implementation
+- Basic integration requirements
+- Manageable scalability needs" ;;
+esac)
+
+### Financial Risks
+- Customer acquisition costs
+- Development and operational expenses
+- Cash flow management during growth phase
+
+### Mitigation Strategies
+- Phased development approach to minimize risk
+- Strong technical team and architecture
+- Conservative financial planning
+- Customer feedback-driven development
+
+## User Personas
+### Primary Persona
+$(case "$domain" in
+    "ecommerce") echo "**Small Business Owner**
+- Demographics: 25-45 years old, tech-savvy
+- Goals: Grow online sales, manage inventory efficiently
+- Pain points: Complex e-commerce platforms, high fees
+- Features needed: Easy setup, payment processing, inventory management" ;;
+    "project_management") echo "**Project Manager**
+- Demographics: 30-50 years old, experienced in project management
+- Goals: Improve team productivity, meet deadlines
+- Pain points: Complex tools, poor team adoption
+- Features needed: Simple interface, team collaboration, progress tracking" ;;
+    *) echo "**Primary User**
+- Demographics: Varies by domain
+- Goals: Efficiency and productivity in $domain workflows
+- Pain points: Current solutions are complex or expensive
+- Features needed: $(echo "$features" | jq -r 'join(", ")')" ;;
+esac)
+
+## Go-to-Market Strategy
+### Launch Plan
+1. **MVP Development** (Months 1-3)
+   - Core features implementation
+   - Basic user interface
+   - Initial testing and feedback
+
+2. **Beta Launch** (Month 4)
+   - Limited user testing
+   - Feedback collection and iteration
+   - Performance optimization
+
+3. **Public Launch** (Month 5-6)
+   - Full feature set release
+   - Marketing campaign launch
+   - Customer acquisition focus
+
+### Marketing Channels
+- Digital marketing (SEO, content marketing, social media)
+- Industry partnerships and integrations
+- Direct sales for enterprise customers
+- Referral and affiliate programs
+
+## Financial Projections
+### Year 1 Targets
+- Users: 1,000-5,000 active users
+- Revenue: \$50,000-\$250,000 ARR
+- Customer Acquisition Cost: \$50-\$200
+- Monthly Churn Rate: <5%
+
+### Growth Projections
+- Year 2: 5x user growth, 4x revenue growth
+- Year 3: 3x user growth, 3x revenue growth
+- Break-even: Month 12-18
+
+## Recommendations
+1. **Focus on user experience** - Prioritize simplicity and usability
+2. **Implement feedback loops** - Regular user feedback and iteration
+3. **Build strategic partnerships** - Integrate with complementary tools
+4. **Plan for scale** - Architecture that supports growth
+5. **Monitor key metrics** - Track user engagement and business KPIs
+
+## Success Metrics
+- Monthly Active Users (MAU)
+- Customer Lifetime Value (CLV)
+- Net Promoter Score (NPS)
+- Monthly Recurring Revenue (MRR)
+- Customer Acquisition Cost (CAC)
+EOF
+
+    # Generate additional business artifacts
+    generate_market_analysis "$domain" "$features"
+    generate_business_model_canvas "$domain" "$features"
+    generate_risk_assessment "$domain" "$complexity"
+    generate_user_personas "$domain" "$features"
+}
+
+generate_market_analysis() {
+    local domain="$1"
+    local features="$2"
+    
+    mkdir -p "$ARTIFACTS_DIR/business"
+    
+    cat > "$ARTIFACTS_DIR/business/market_analysis.json" << EOF
+{
+  "market_analysis": {
+    "domain": "$domain",
+    "market_size": {
+      "tam": "Total addressable market for $domain applications",
+      "sam": "Serviceable addressable market segment",
+      "som": "Serviceable obtainable market opportunity"
+    },
+    "target_segments": [
+      $(case "$domain" in
+        "ecommerce") echo "\"small_businesses\", \"online_retailers\", \"entrepreneurs\"" ;;
+        "project_management") echo "\"teams\", \"agencies\", \"remote_workers\"" ;;
+        "healthcare") echo "\"healthcare_providers\", \"patients\", \"administrators\"" ;;
+        *) echo "\"primary_users\", \"business_users\", \"enterprise_customers\"" ;;
+      esac)
+    ],
+    "growth_trends": [
+      "Digital transformation acceleration",
+      "Increased demand for $domain solutions",
+      "Cloud adoption and SaaS preference"
+    ],
+    "key_features_value": $(echo "$features" | jq 'map({"feature": ., "market_value": "high"})')
+  }
+}
+EOF
+}
+
+generate_business_model_canvas() {
+    local domain="$1"
+    local features="$2"
+    
+    cat > "$ARTIFACTS_DIR/business/business_model_canvas.json" << EOF
+{
+  "business_model_canvas": {
+    "key_partners": [
+      $(case "$domain" in
+        "ecommerce") echo "\"Payment processors\", \"Shipping providers\", \"Marketing platforms\"" ;;
+        "project_management") echo "\"Integration partners\", \"Consultants\", \"Training providers\"" ;;
+        *) echo "\"Technology partners\", \"Service providers\", \"Channel partners\"" ;;
+      esac)
+    ],
+    "key_activities": [
+      "Product development",
+      "Customer acquisition",
+      "Customer support",
+      "Platform maintenance"
+    ],
+    "key_resources": [
+      "Technology platform",
+      "Development team",
+      "Customer data",
+      "Brand and reputation"
+    ],
+    "value_propositions": [
+      $(case "$domain" in
+        "ecommerce") echo "\"Easy online store setup\", \"Integrated payment processing\", \"Inventory management\"" ;;
+        "project_management") echo "\"Simplified project tracking\", \"Team collaboration\", \"Progress visibility\"" ;;
+        *) echo "\"Streamlined workflows\", \"Enhanced productivity\", \"Cost-effective solution\"" ;;
+      esac)
+    ],
+    "customer_relationships": [
+      "Self-service platform",
+      "Customer support",
+      "Community forums",
+      "Educational content"
+    ],
+    "channels": [
+      "Direct website",
+      "Digital marketing",
+      "Partner channels",
+      "App marketplaces"
+    ],
+    "customer_segments": [
+      $(case "$domain" in
+        "ecommerce") echo "\"Small businesses\", \"Online entrepreneurs\", \"Retailers\"" ;;
+        "project_management") echo "\"Project managers\", \"Teams\", \"Agencies\"" ;;
+        *) echo "\"Primary users\", \"Business users\", \"Enterprise customers\"" ;;
+      esac)
+    ],
+    "cost_structure": [
+      "Development and engineering",
+      "Cloud infrastructure",
+      "Customer acquisition",
+      "Operations and support"
+    ],
+    "revenue_streams": [
+      $(case "$domain" in
+        "ecommerce") echo "\"Monthly subscriptions\", \"Transaction fees\", \"Premium features\"" ;;
+        "project_management") echo "\"Subscription plans\", \"Enterprise licenses\", \"Professional services\"" ;;
+        *) echo "\"Subscription revenue\", \"Premium features\", \"Enterprise solutions\"" ;;
+      esac)
+    ]
+  }
+}
+EOF
+}
+
+generate_risk_assessment() {
+    local domain="$1"
+    local complexity="$2"
+    
+    cat > "$ARTIFACTS_DIR/business/risk_assessment.json" << EOF
+{
+  "risk_assessment": {
+    "market_risks": [
+      {
+        "risk": "Competitive pressure",
+        "probability": "medium",
+        "impact": "high",
+        "mitigation": "Differentiation through superior UX and pricing"
+      },
+      {
+        "risk": "Market saturation",
+        "probability": "low",
+        "impact": "medium", 
+        "mitigation": "Focus on underserved segments and niches"
+      }
+    ],
+    "technical_risks": [
+      {
+        "risk": "Scalability challenges",
+        "probability": $(case "$complexity" in "high") echo "\"medium\"" ;; *) echo "\"low\"" ;; esac),
+        "impact": "high",
+        "mitigation": "Robust architecture and performance testing"
+      },
+      {
+        "risk": "Security vulnerabilities",
+        "probability": "low",
+        "impact": "high",
+        "mitigation": "Security best practices and regular audits"
+      }
+    ],
+    "financial_risks": [
+      {
+        "risk": "High customer acquisition costs",
+        "probability": "medium",
+        "impact": "medium",
+        "mitigation": "Optimize marketing channels and referral programs"
+      },
+      {
+        "risk": "Cash flow management",
+        "probability": "medium",
+        "impact": "high",
+        "mitigation": "Conservative financial planning and runway management"
+      }
+    ],
+    "operational_risks": [
+      {
+        "risk": "Team scaling challenges",
+        "probability": "medium",
+        "impact": "medium",
+        "mitigation": "Structured hiring process and knowledge documentation"
+      }
+    ]
+  }
+}
+EOF
+}
+
+generate_user_personas() {
+    local domain="$1"
+    local features="$2"
+    
+    cat > "$ARTIFACTS_DIR/business/user_personas.json" << EOF
+{
+  "user_personas": [
+    {
+      "persona_name": $(case "$domain" in
+        "ecommerce") echo "\"Online Store Owner\"" ;;
+        "project_management") echo "\"Project Manager\"" ;;
+        "healthcare") echo "\"Healthcare Provider\"" ;;
+        "fintech") echo "\"Financial Service User\"" ;;
+        *) echo "\"Primary User\"" ;;
+      esac),
+      "demographics": {
+        "age_range": "25-45",
+        "tech_savviness": "medium to high",
+        "industry_experience": "3-10 years"
+      },
+      "goals": [
+        $(case "$domain" in
+          "ecommerce") echo "\"Increase online sales\", \"Streamline inventory management\", \"Reduce operational costs\"" ;;
+          "project_management") echo "\"Improve team productivity\", \"Meet project deadlines\", \"Enhance collaboration\"" ;;
+          "healthcare") echo "\"Improve patient care\", \"Streamline workflows\", \"Ensure compliance\"" ;;
+          *) echo "\"Increase efficiency\", \"Improve outcomes\", \"Reduce complexity\"" ;;
+        esac)
+      ],
+      "pain_points": [
+        $(case "$domain" in
+          "ecommerce") echo "\"Complex setup processes\", \"High platform fees\", \"Limited customization\"" ;;
+          "project_management") echo "\"Tool complexity\", \"Poor team adoption\", \"Lack of visibility\"" ;;
+          "healthcare") echo "\"System complexity\", \"Time-consuming processes\", \"Compliance burden\"" ;;
+          *) echo "\"Current solution limitations\", \"High costs\", \"Poor user experience\"" ;;
+        esac)
+      ],
+      "preferred_features": $(echo "$features" | jq 'map(select(. != null)) | .[0:5]'),
+      "behavior_patterns": [
+        "Prefers simple, intuitive interfaces",
+        "Values reliable and fast performance",
+        "Seeks cost-effective solutions",
+        "Appreciates responsive customer support"
+      ]
+    }
+  ]
+}
+EOF
+}
+
 # Main execution logic
 main() {
     echo "[$AGENT_ID] Unified agent executor starting"
@@ -982,6 +1450,9 @@ main() {
             ;;
         "documenter")
             execute_documenter_task "$analysis" "$agent_capabilities"
+            ;;
+        "business_analyst")
+            execute_business_analyst_task "$analysis" "$agent_capabilities"
             ;;
         *)
             echo "[$AGENT_ID] Unknown agent type: $AGENT_TYPE, using general execution"
