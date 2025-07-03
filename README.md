@@ -1,6 +1,21 @@
 # Agent Swarm Framework
 
-A powerful bash-based agent swarm system that generates complete software applications via coordinated AI agents. The system analyzes specifications and autonomously plans, designs, implements, tests, and documents applications through specialized agents.
+A powerful bash-based agent swarm system that generates complete software applications via coordinated specialized agents. The system analyzes specifications and autonomously plans, designs, implements, tests, and documents applications through a multi-agent architecture.
+
+## 🤖 **Important: AI Integration**
+
+**Current Implementation:** This framework demonstrates the **agent coordination and task planning concepts** using template-based code generation. While it produces working applications, the agents use predefined templates rather than dynamic AI generation.
+
+**For True AI Power:** See [AI_INTEGRATION.md](AI_INTEGRATION.md) for instructions on integrating with Claude API or other AI systems to enable intelligent, specification-aware code generation.
+
+**Quick AI Setup:**
+```bash
+# Set your Claude API key
+export CLAUDE_API_KEY="sk-ant-api03-your-key-here"
+
+# Use AI-enhanced agents (coming soon)
+./swarm_ai.sh agents.json my_spec.txt --ai-enabled
+```
 
 ## 🚀 Features
 

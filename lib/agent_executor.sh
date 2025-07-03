@@ -183,7 +183,7 @@ execute_single_task() {
     fi
 }
 
-# Execute specific agent type
+# Execute specific agent type using unified agent executor
 execute_agent() {
     local agent_id="$1"
     local agent_type="$2"
@@ -210,90 +210,29 @@ execute_agent() {
 }
 EOF
     
-    # Execute agent based on type
-    case "$agent_type" in
-        "architect")
-            execute_architect_agent "$agent_id" "$agent_workspace"
-            ;;
-        "developer")
-            execute_developer_agent "$agent_id" "$agent_workspace"
-            ;;
-        "tester")
-            execute_tester_agent "$agent_id" "$agent_workspace"
-            ;;
-        "documenter")
-            execute_documenter_agent "$agent_id" "$agent_workspace"
-            ;;
-        *)
-            log_error "$agent_id" "Unknown agent type: $agent_type"
-            return 1
-            ;;
-    esac
-}
-
-# Execute architect agent
-execute_architect_agent() {
-    local agent_id="$1"
-    local workspace="$2"
+    # Execute unified agent executor
+    log_agent "$agent_id" "INFO" "Executing unified agent executor for $agent_type task"
     
-    log_agent "$agent_id" "INFO" "Executing architect agent"
-    
-    # Run architect agent script
-    if [[ -f "${AGENTS_DIR}/architect.sh" ]]; then
-        bash "${AGENTS_DIR}/architect.sh" "$workspace/task_context.json" > "$workspace/output.log" 2>&1
+    if [[ -f "${AGENTS_DIR}/agent_executor.sh" ]]; then
+        bash "${AGENTS_DIR}/agent_executor.sh" "$agent_workspace/task_context.json" > "$agent_workspace/output.log" 2>&1
+        return $?
     else
-        # Fallback: create basic architectural output
-        create_architecture_output "$agent_id" "$workspace"
+        log_error "$agent_id" "Unified agent executor not found: ${AGENTS_DIR}/agent_executor.sh"
+        # Fallback to legacy execution if needed
+        execute_legacy_agent "$agent_id" "$agent_type" "$agent_workspace"
+        return $?
     fi
 }
 
-# Execute developer agent  
-execute_developer_agent() {
+# Legacy fallback agent execution (when unified executor is not available)
+execute_legacy_agent() {
     local agent_id="$1"
-    local workspace="$2"
+    local agent_type="$2"
+    local workspace="$3"
     
-    log_agent "$agent_id" "INFO" "Executing developer agent"
+    log_agent "$agent_id" "WARN" "Using legacy fallback for $agent_type agent"
     
-    if [[ -f "${AGENTS_DIR}/developer.sh" ]]; then
-        bash "${AGENTS_DIR}/developer.sh" "$workspace/task_context.json" > "$workspace/output.log" 2>&1
-    else
-        create_development_output "$agent_id" "$workspace"
-    fi
-}
-
-# Execute tester agent
-execute_tester_agent() {
-    local agent_id="$1"
-    local workspace="$2"
-    
-    log_agent "$agent_id" "INFO" "Executing tester agent"
-    
-    if [[ -f "${AGENTS_DIR}/tester.sh" ]]; then
-        bash "${AGENTS_DIR}/tester.sh" "$workspace/task_context.json" > "$workspace/output.log" 2>&1
-    else
-        create_testing_output "$agent_id" "$workspace"
-    fi
-}
-
-# Execute documenter agent
-execute_documenter_agent() {
-    local agent_id="$1"
-    local workspace="$2"
-    
-    log_agent "$agent_id" "INFO" "Executing documenter agent"
-    
-    if [[ -f "${AGENTS_DIR}/documenter.sh" ]]; then
-        bash "${AGENTS_DIR}/documenter.sh" "$workspace/task_context.json" > "$workspace/output.log" 2>&1
-    else
-        create_documentation_output "$agent_id" "$workspace"
-    fi
-}
-
-# Fallback output creators (when agent scripts don't exist)
-create_architecture_output() {
-    local agent_id="$1"
-    local workspace="$2"
-    
+    # Create basic output based on agent type
     mkdir -p "${WORK_DIR}/artifacts"
     
     local task_context
@@ -302,132 +241,139 @@ create_architecture_output() {
     task_id=$(echo "$task_context" | jq -r '.task_id')
     description=$(echo "$task_context" | jq -r '.description')
     
-    cat > "${WORK_DIR}/artifacts/${task_id}_output.md" << EOF
+    case "$agent_type" in
+        "architect")
+            create_basic_architecture_output "$agent_id" "$task_id" "$description"
+            ;;
+        "developer") 
+            create_basic_development_output "$agent_id" "$task_id" "$description"
+            ;;
+        "tester")
+            create_basic_testing_output "$agent_id" "$task_id" "$description"
+            ;;
+        "documenter")
+            create_basic_documentation_output "$agent_id" "$task_id" "$description"
+            ;;
+        *)
+            create_basic_generic_output "$agent_id" "$task_id" "$description" "$agent_type"
+            ;;
+    esac
+    
+    log_agent "$agent_id" "INFO" "Legacy fallback output created for $task_id"
+}
+
+# Basic output creators for legacy fallback
+create_basic_architecture_output() {
+    local agent_id="$1"
+    local task_id="$2"
+    local description="$3"
+    
+    cat > "${WORK_DIR}/artifacts/${task_id}_architecture.md" << EOF
 # Architecture Output - $task_id
 
-**Agent:** $agent_id
+**Agent:** $agent_id  
 **Task:** $description
-**Generated:** $(date -Iseconds)
+**Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-## Architecture Decisions
+## System Architecture
+Basic system architecture decisions and patterns.
 
-[Generated architecture content would go here]
+## Technology Stack
+- Backend: Node.js/Express
+- Frontend: React
+- Database: PostgreSQL
+- Cache: Redis
 
-## Technical Stack
-
-[Technology decisions would be documented here]
-
-## System Design
-
-[High-level system design would be described here]
+## API Design
+RESTful API with standard endpoints.
 EOF
-    
-    log_agent "$agent_id" "INFO" "Created architecture output: ${task_id}_output.md"
 }
 
-create_development_output() {
+create_basic_development_output() {
     local agent_id="$1"
-    local workspace="$2"
+    local task_id="$2" 
+    local description="$3"
     
-    mkdir -p "${WORK_DIR}/artifacts/code"
-    
-    local task_context
-    task_context=$(cat "$workspace/task_context.json")
-    local task_id description
-    task_id=$(echo "$task_context" | jq -r '.task_id')
-    description=$(echo "$task_context" | jq -r '.description')
-    
-    cat > "${WORK_DIR}/artifacts/code/${task_id}_implementation.md" << EOF
-# Implementation - $task_id
+    cat > "${WORK_DIR}/artifacts/${task_id}_implementation.md" << EOF
+# Implementation Output - $task_id
 
 **Agent:** $agent_id
-**Task:** $description
-**Generated:** $(date -Iseconds)
+**Task:** $description  
+**Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
 
 ## Code Implementation
+Basic code structure and implementation approach.
 
-[Generated code would go here]
+## Project Structure
+Standard project layout with src/, tests/, and config/ directories.
 
 ## Dependencies
-
-[Required dependencies would be listed here]
-
-## Notes
-
-[Implementation notes and considerations]
+Package dependencies and build configuration.
 EOF
-    
-    log_agent "$agent_id" "INFO" "Created development output: code/${task_id}_implementation.md"
 }
 
-create_testing_output() {
+create_basic_testing_output() {
     local agent_id="$1"
-    local workspace="$2"
+    local task_id="$2"
+    local description="$3"
     
-    mkdir -p "${WORK_DIR}/artifacts/tests"
-    
-    local task_context
-    task_context=$(cat "$workspace/task_context.json")
-    local task_id description
-    task_id=$(echo "$task_context" | jq -r '.task_id')
-    description=$(echo "$task_context" | jq -r '.description')
-    
-    cat > "${WORK_DIR}/artifacts/tests/${task_id}_tests.md" << EOF
-# Test Implementation - $task_id
+    cat > "${WORK_DIR}/artifacts/${task_id}_tests.md" << EOF
+# Testing Output - $task_id
 
 **Agent:** $agent_id
 **Task:** $description
-**Generated:** $(date -Iseconds)
+**Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-## Test Cases
+## Test Strategy
+Unit tests, integration tests, and end-to-end testing approach.
 
-[Generated test cases would go here]
+## Test Framework
+Jest for unit testing, Cypress for E2E testing.
 
-## Test Data
-
-[Test data and fixtures]
-
-## Coverage
-
-[Coverage requirements and notes]
+## Coverage Goals
+Target 80% code coverage across all modules.
 EOF
-    
-    log_agent "$agent_id" "INFO" "Created testing output: tests/${task_id}_tests.md"
 }
 
-create_documentation_output() {
+create_basic_documentation_output() {
     local agent_id="$1"
-    local workspace="$2"
+    local task_id="$2"
+    local description="$3"
     
-    mkdir -p "${WORK_DIR}/artifacts/docs"
-    
-    local task_context
-    task_context=$(cat "$workspace/task_context.json")
-    local task_id description
-    task_id=$(echo "$task_context" | jq -r '.task_id')
-    description=$(echo "$task_context" | jq -r '.description')
-    
-    cat > "${WORK_DIR}/artifacts/docs/${task_id}_documentation.md" << EOF
-# Documentation - $task_id
+    cat > "${WORK_DIR}/artifacts/${task_id}_documentation.md" << EOF
+# Documentation Output - $task_id
 
 **Agent:** $agent_id
 **Task:** $description
-**Generated:** $(date -Iseconds)
+**Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-## Overview
+## Technical Documentation
+API documentation, deployment guides, and technical specifications.
 
-[Documentation content would go here]
+## User Documentation
+User guides and how-to documentation.
 
-## Usage
-
-[Usage instructions and examples]
-
-## References
-
-[Links and additional resources]
+## Deployment Guide
+Instructions for deployment and configuration.
 EOF
+}
+
+create_basic_generic_output() {
+    local agent_id="$1"
+    local task_id="$2"
+    local description="$3"
+    local agent_type="$4"
     
-    log_agent "$agent_id" "INFO" "Created documentation output: docs/${task_id}_documentation.md"
+    cat > "${WORK_DIR}/artifacts/${task_id}_${agent_type}.md" << EOF
+# $agent_type Output - $task_id
+
+**Agent:** $agent_id
+**Task:** $description
+**Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+## Output
+Basic $agent_type task output and results.
+EOF
 }
 
 # Mark task as completed

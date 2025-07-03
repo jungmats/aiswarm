@@ -1,19 +1,81 @@
 #!/bin/bash
 
-# Task Planning System - Analyzes specifications and creates task breakdown
+# Enhanced Task Planning System - Uses intelligent planner agent for dynamic analysis
 
 source "${SCRIPT_DIR}/lib/logger.sh"
 
 TASK_PLAN_FILE="${WORK_DIR}/task_plan.json"
 
-# Parse specification file and create task breakdown
+# Parse specification file and create intelligent task breakdown
 plan_tasks() {
     local spec_file="$1"
     local agents_config="$2"
     
-    log_info "PLANNER" "Starting task planning analysis"
+    log_info "PLANNER" "Starting intelligent task planning analysis"
     log_info "PLANNER" "Input spec: $spec_file"
     log_info "PLANNER" "Input agents: $agents_config"
+    
+    # Check if planner agent exists
+    if [[ -f "${SCRIPT_DIR}/agents/planner.sh" ]]; then
+        log_info "PLANNER" "Using intelligent planner agent for dynamic analysis"
+        use_intelligent_planner "$spec_file" "$agents_config"
+    else
+        log_info "PLANNER" "Falling back to static task planning"
+        use_static_planner "$spec_file" "$agents_config"
+    fi
+    
+    log_info "PLANNER" "Task plan created: $TASK_PLAN_FILE"
+    echo -e "${GREEN}✅ Task planning completed${NC}" | tee -a "$MAIN_LOG"
+}
+
+# Use intelligent planner agent for dynamic task creation
+use_intelligent_planner() {
+    local spec_file="$1"
+    local agents_config="$2"
+    
+    log_info "PLANNER" "Invoking intelligent planner agent"
+    
+    # Create task context for planner agent
+    local planner_context_file="${WORK_DIR}/planner_context.json"
+    cat > "$planner_context_file" << EOF
+{
+    "agent_id": "planner_$(date +%s)",
+    "task_id": "plan_intelligent",
+    "description": "Analyze requirements and create dynamic task plan",
+    "workspace": "$WORK_DIR",
+    "session_artifacts": "$WORK_DIR/artifacts",
+    "requirements_file": "$spec_file",
+    "agents_config": "$agents_config"
+}
+EOF
+    
+    # Create artifacts directory
+    mkdir -p "$WORK_DIR/artifacts"
+    
+    # Execute planner agent
+    log_info "PLANNER" "Executing intelligent planner agent"
+    if "${SCRIPT_DIR}/agents/planner.sh" "$planner_context_file"; then
+        # Use the dynamically generated task plan
+        local dynamic_plan="$WORK_DIR/artifacts/plans/dynamic_task_plan.json"
+        if [[ -f "$dynamic_plan" ]]; then
+            log_info "PLANNER" "Using dynamically generated task plan"
+            cp "$dynamic_plan" "$TASK_PLAN_FILE"
+        else
+            log_warn "PLANNER" "Dynamic plan not found, falling back to static planning"
+            use_static_planner "$spec_file" "$agents_config"
+        fi
+    else
+        log_error "PLANNER" "Intelligent planner failed, falling back to static planning"
+        use_static_planner "$spec_file" "$agents_config"
+    fi
+}
+
+# Fallback static planner (original implementation)
+use_static_planner() {
+    local spec_file="$1"
+    local agents_config="$2"
+    
+    log_info "PLANNER" "Using static task planning"
     
     # Read and analyze specification
     local spec_content
@@ -30,9 +92,6 @@ plan_tasks() {
     
     # Create initial task breakdown
     create_task_breakdown "$app_purpose" "$app_features" "$app_constraints" "$app_requirements" "$agents_config"
-    
-    log_info "PLANNER" "Task plan created: $TASK_PLAN_FILE"
-    echo -e "${GREEN}✅ Task planning completed${NC}" | tee -a "$MAIN_LOG"
 }
 
 # Extract sections from specification text
