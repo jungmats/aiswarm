@@ -56,19 +56,26 @@ init_system() {
         echo -e "${YELLOW}📋 Sequential execution mode${NC}"
     fi
     
-    # Create directories
-    mkdir -p "$LOG_DIR" "$WORK_DIR" "$AGENTS_DIR"
-    
-    # Create session log
+    # Create session ID first
     SESSION_ID="swarm_$(date +%Y%m%d_%H%M%S)"
-    MAIN_LOG="${LOG_DIR}/${SESSION_ID}_main.log"
-    AGENT_LOG="${LOG_DIR}/${SESSION_ID}_agents.log"
-    TASK_LOG="${LOG_DIR}/${SESSION_ID}_tasks.log"
+    
+    # Create directories including session-specific workspace and logs
+    mkdir -p "$WORK_DIR" "$AGENTS_DIR"
+    SESSION_WORKSPACE="${WORK_DIR}/${SESSION_ID}"
+    SESSION_LOG_DIR="${SESSION_WORKSPACE}/logs"
+    mkdir -p "$SESSION_WORKSPACE" "$SESSION_LOG_DIR"
+    
+    # Create session logs within the workspace
+    MAIN_LOG="${SESSION_LOG_DIR}/main.log"
+    AGENT_LOG="${SESSION_LOG_DIR}/agents.log"
+    TASK_LOG="${SESSION_LOG_DIR}/tasks.log"
     
     # Export for use in sourced scripts
-    export SESSION_ID MAIN_LOG AGENT_LOG TASK_LOG
+    export SESSION_ID SESSION_WORKSPACE SESSION_LOG_DIR MAIN_LOG AGENT_LOG TASK_LOG
     
     echo "Session ID: $SESSION_ID" | tee "$MAIN_LOG"
+    echo "Session Workspace: $SESSION_WORKSPACE" | tee -a "$MAIN_LOG"
+    echo "Session Logs: $SESSION_LOG_DIR" | tee -a "$MAIN_LOG"
     echo "Started at: $(date)" | tee -a "$MAIN_LOG"
     echo "Execution Mode: $([ "$PARALLEL_MODE" = true ] && echo "Parallel" || echo "Sequential")" | tee -a "$MAIN_LOG"
     echo "Arguments: $*" | tee -a "$MAIN_LOG"
@@ -193,8 +200,9 @@ main() {
     fi
     
     echo -e "${GREEN}🎉 Agent swarm execution completed!${NC}" | tee -a "$MAIN_LOG"
-    echo -e "${YELLOW}📊 Check logs in: $LOG_DIR${NC}"
-    echo -e "${YELLOW}💾 Output in: $WORK_DIR${NC}"
+    echo -e "${YELLOW}📊 Session workspace: $SESSION_WORKSPACE${NC}"
+    echo -e "${YELLOW}📋 Session logs: $SESSION_LOG_DIR${NC}"
+    echo -e "${YELLOW}💾 Generated artifacts: $SESSION_WORKSPACE/artifacts${NC}"
     
     # Show final summary
     show_final_summary
@@ -206,9 +214,9 @@ show_final_summary() {
     echo -e "${BLUE}=== Final Execution Summary ===${NC}"
     
     local total_tasks completed_tasks failed_tasks
-    total_tasks=$(jq '.phases | to_entries | map(.value.tasks | length) | add' "${WORK_DIR}/task_plan.json" 2>/dev/null || echo "0")
-    completed_tasks=$(jq '.completed | length' "${WORK_DIR}/task_queue.json" 2>/dev/null || echo "0")
-    failed_tasks=$(jq '.failed | length' "${WORK_DIR}/task_queue.json" 2>/dev/null || echo "0")
+    total_tasks=$(jq '.phases | to_entries | map(.value.tasks | length) | add' "${SESSION_WORKSPACE}/task_plan.json" 2>/dev/null || echo "0")
+    completed_tasks=$(jq '.completed | length' "${SESSION_WORKSPACE}/task_queue.json" 2>/dev/null || echo "0")
+    failed_tasks=$(jq '.failed | length' "${SESSION_WORKSPACE}/task_queue.json" 2>/dev/null || echo "0")
     
     echo "Execution Mode: $([ "$PARALLEL_MODE" = true ] && echo "Parallel" || echo "Sequential")"
     echo "Total Tasks: $total_tasks"
@@ -223,7 +231,7 @@ show_final_summary() {
         echo "Theoretical Speedup: Up to ${max_parallel}x faster"
     fi
     
-    echo "Generated Files: $(find "${WORK_DIR}/artifacts" -type f 2>/dev/null | wc -l || echo "0")"
+    echo "Generated Files: $(find "${SESSION_WORKSPACE}/artifacts" -type f 2>/dev/null | wc -l || echo "0")"
     echo "Session ID: $SESSION_ID"
 }
 
@@ -238,7 +246,7 @@ cleanup() {
         jobs -p | xargs -r kill 2>/dev/null || true
     fi
     
-    echo -e "${YELLOW}📋 Partial results available in: $WORK_DIR${NC}"
+    echo -e "${YELLOW}📋 Partial results available in: $SESSION_WORKSPACE${NC}"
     exit 130
 }
 

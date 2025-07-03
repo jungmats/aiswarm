@@ -91,7 +91,7 @@ cd my-agent-swarm
 ### 2. Set Up Executable Permissions
 
 ```bash
-# The framework automatically creates necessary directories (logs/, workspace/)
+# The framework automatically creates session workspaces with logs
 # Just ensure scripts are executable:
 chmod +x swarm_parallel.sh
 chmod +x agents/planner.sh  
@@ -112,8 +112,7 @@ agent-swarm/
 │   ├── planner.sh           # Intelligent requirements analyzer & task planner
 │   └── agent_executor.sh    # Unified AI-powered agent executor
 ├── agents_enhanced.json     # Enhanced agent configuration with capabilities
-├── logs/                   # Generated activity logs
-└── workspace/              # Generated projects and artifacts
+└── workspace/              # Session-specific workspaces with logs and artifacts
 ```
 
 ### 3. Verify Installation
@@ -136,7 +135,7 @@ Arguments:
 
 ### Step 1: Use Enhanced Agent Configuration
 
-The framework includes `agents_enhanced.json` with intelligent agent definitions:
+The framework includes `agents.json` with intelligent agent definitions:
 
 ```json
 {
@@ -706,17 +705,26 @@ The system intelligently combines these technologies to create the perfect stack
 
 ### Logging and Tracking
 
-Monitor agent activities in the `logs/` directory:
+Monitor agent activities in the session workspace:
 ```bash
+# Find your latest session
+LATEST_SESSION=$(ls -t workspace/ | head -1)
+
 # View main execution log
-tail -f logs/swarm_*_main.log
+tail -f workspace/$LATEST_SESSION/logs/main.log
 
 # Monitor agent activities
-tail -f logs/swarm_*_agents.log
+tail -f workspace/$LATEST_SESSION/logs/agents.log
 
 # Track task completion
-tail -f logs/swarm_*_tasks.log
+tail -f workspace/$LATEST_SESSION/logs/tasks.log
 ```
+
+**Session-Based Logging Benefits:**
+- Each run creates isolated logs
+- Easy to compare different executions
+- Complete history preservation
+- All artifacts stay together
 
 ### Task Execution Flow
 
@@ -752,7 +760,9 @@ sudo apt install jq
 **Task Failures:**
 Check the logs for specific error messages:
 ```bash
-cat logs/swarm_*_main.log | grep ERROR
+# Find your session and check logs
+LATEST_SESSION=$(ls -t workspace/ | head -1)
+cat workspace/$LATEST_SESSION/logs/main.log | grep ERROR
 ```
 
 **Empty Output:**
@@ -795,12 +805,53 @@ export LOG_LEVEL=debug
 # Update architect.sh for microservices patterns
 ```
 
+## 📂 **Session-Based Workspace Structure**
+
+Every execution creates a **dedicated session workspace** for complete isolation and easy management:
+
+```
+workspace/
+└── swarm_20250103_143022/        # Timestamp-based session directory
+    ├── logs/                     # Session-specific logs
+    │   ├── main.log             # Main execution log
+    │   ├── agents.log           # Agent activities log  
+    │   └── tasks.log            # Task completion log
+    ├── task_plan.json           # Dynamic task plan
+    ├── task_queue.json          # Task execution status
+    ├── planner_context.json     # Planner configuration
+    └── artifacts/               # Generated application
+        ├── analysis/            # Requirements analysis
+        ├── plans/              # Task plans
+        ├── architecture/       # System architecture
+        ├── business/           # Business analysis
+        ├── docs/              # Documentation
+        ├── testing/           # Test suites
+        └── project/           # Complete application code
+```
+
+**Key Benefits:**
+- **Session Isolation**: Each run is completely independent
+- **Easy Comparison**: Compare different runs side-by-side  
+- **Complete History**: All logs and artifacts stay together
+- **Clean Organization**: No file conflicts between runs
+- **Simple Cleanup**: Delete entire session directories when needed
+
+**Real-Time Monitoring:**
+```bash
+# Watch your latest session
+LATEST=$(ls -t workspace/ | head -1)
+tail -f workspace/$LATEST/logs/main.log
+
+# Check progress
+find workspace/$LATEST/artifacts -type f | wc -l
+```
+
 ## 📚 Resources
 
 - **Generated Documentation** - Each project includes comprehensive docs
-- **Example Applications** - Check `workspace/artifacts/` for examples
-- **Agent Logs** - Review `logs/` for execution details
-- **Task Plans** - Examine `workspace/task_plan.json` for planning insights
+- **Example Applications** - Check `workspace/[session]/artifacts/` for examples
+- **Session Logs** - Review `workspace/[session]/logs/` for execution details
+- **Task Plans** - Examine `workspace/[session]/task_plan.json` for planning insights
 
 ## 🚀 Getting Started Checklist
 
@@ -812,7 +863,7 @@ export LOG_LEVEL=debug
 - [ ] Use included `agents_enhanced.json` configuration (or customize)
 - [ ] Write your application specification for ANY domain
 - [ ] Run `./swarm_parallel.sh agents_enhanced.json your_spec.txt --parallel`
-- [ ] Review generated domain-specific project in `workspace/artifacts/project/`
+- [ ] Review generated domain-specific project in `workspace/[session]/artifacts/project/`
 - [ ] Deploy with Docker or manually install dependencies
 - [ ] Customize and extend the generated application
 

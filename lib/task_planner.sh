@@ -4,7 +4,7 @@
 
 source "${SCRIPT_DIR}/lib/logger.sh"
 
-TASK_PLAN_FILE="${WORK_DIR}/task_plan.json"
+TASK_PLAN_FILE="${SESSION_WORKSPACE}/task_plan.json"
 
 # Parse specification file and create intelligent task breakdown
 plan_tasks() {
@@ -36,27 +36,27 @@ use_intelligent_planner() {
     log_info "PLANNER" "Invoking intelligent planner agent"
     
     # Create task context for planner agent
-    local planner_context_file="${WORK_DIR}/planner_context.json"
+    local planner_context_file="${SESSION_WORKSPACE}/planner_context.json"
     cat > "$planner_context_file" << EOF
 {
     "agent_id": "planner_$(date +%s)",
     "task_id": "plan_intelligent",
     "description": "Analyze requirements and create dynamic task plan",
-    "workspace": "$WORK_DIR",
-    "session_artifacts": "$WORK_DIR/artifacts",
+    "workspace": "$SESSION_WORKSPACE",
+    "session_artifacts": "$SESSION_WORKSPACE/artifacts",
     "requirements_file": "$spec_file",
     "agents_config": "$agents_config"
 }
 EOF
     
     # Create artifacts directory
-    mkdir -p "$WORK_DIR/artifacts"
+    mkdir -p "$SESSION_WORKSPACE/artifacts"
     
     # Execute planner agent
     log_info "PLANNER" "Executing intelligent planner agent"
     if "${SCRIPT_DIR}/agents/planner.sh" "$planner_context_file"; then
         # Use the dynamically generated task plan
-        local dynamic_plan="$WORK_DIR/artifacts/plans/dynamic_task_plan.json"
+        local dynamic_plan="$SESSION_WORKSPACE/artifacts/plans/dynamic_task_plan.json"
         if [[ -f "$dynamic_plan" ]]; then
             log_info "PLANNER" "Using dynamically generated task plan"
             cp "$dynamic_plan" "$TASK_PLAN_FILE"
