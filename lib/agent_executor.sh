@@ -6,8 +6,8 @@ source "${SCRIPT_DIR}/lib/logger.sh"
 
 # Global variables for execution state
 AGENTS_CONFIG=""
-TASK_QUEUE_FILE="${WORK_DIR}/task_queue.json"
-EXECUTION_STATE_FILE="${WORK_DIR}/execution_state.json"
+TASK_QUEUE_FILE="${SESSION_WORKSPACE}/task_queue.json"
+EXECUTION_STATE_FILE="${SESSION_WORKSPACE}/execution_state.json"
 
 # Initialize agent execution system
 execute_swarm() {
@@ -193,7 +193,7 @@ execute_agent() {
     local outputs="$6"
     
     # Create agent workspace
-    local agent_workspace="${WORK_DIR}/agents/${agent_id}"
+    local agent_workspace="${SESSION_WORKSPACE}/agents/${agent_id}"
     mkdir -p "$agent_workspace"
     
     # Create task context file for agent
@@ -206,7 +206,7 @@ execute_agent() {
   "inputs": "$inputs",
   "outputs": "$outputs",
   "workspace": "$agent_workspace",
-  "session_artifacts": "${WORK_DIR}/artifacts"
+  "session_artifacts": "${SESSION_WORKSPACE}/artifacts"
 }
 EOF
     
@@ -233,7 +233,7 @@ execute_legacy_agent() {
     log_agent "$agent_id" "WARN" "Using legacy fallback for $agent_type agent"
     
     # Create basic output based on agent type
-    mkdir -p "${WORK_DIR}/artifacts"
+    mkdir -p "${SESSION_WORKSPACE}/artifacts"
     
     local task_context
     task_context=$(cat "$workspace/task_context.json")
@@ -268,7 +268,7 @@ create_basic_architecture_output() {
     local task_id="$2"
     local description="$3"
     
-    cat > "${WORK_DIR}/artifacts/${task_id}_architecture.md" << EOF
+    cat > "${SESSION_WORKSPACE}/artifacts/${task_id}_architecture.md" << EOF
 # Architecture Output - $task_id
 
 **Agent:** $agent_id  
@@ -294,7 +294,7 @@ create_basic_development_output() {
     local task_id="$2" 
     local description="$3"
     
-    cat > "${WORK_DIR}/artifacts/${task_id}_implementation.md" << EOF
+    cat > "${SESSION_WORKSPACE}/artifacts/${task_id}_implementation.md" << EOF
 # Implementation Output - $task_id
 
 **Agent:** $agent_id
@@ -317,7 +317,7 @@ create_basic_testing_output() {
     local task_id="$2"
     local description="$3"
     
-    cat > "${WORK_DIR}/artifacts/${task_id}_tests.md" << EOF
+    cat > "${SESSION_WORKSPACE}/artifacts/${task_id}_tests.md" << EOF
 # Testing Output - $task_id
 
 **Agent:** $agent_id
@@ -340,7 +340,7 @@ create_basic_documentation_output() {
     local task_id="$2"
     local description="$3"
     
-    cat > "${WORK_DIR}/artifacts/${task_id}_documentation.md" << EOF
+    cat > "${SESSION_WORKSPACE}/artifacts/${task_id}_documentation.md" << EOF
 # Documentation Output - $task_id
 
 **Agent:** $agent_id
@@ -364,7 +364,7 @@ create_basic_generic_output() {
     local description="$3"
     local agent_type="$4"
     
-    cat > "${WORK_DIR}/artifacts/${task_id}_${agent_type}.md" << EOF
+    cat > "${SESSION_WORKSPACE}/artifacts/${task_id}_${agent_type}.md" << EOF
 # $agent_type Output - $task_id
 
 **Agent:** $agent_id

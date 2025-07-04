@@ -29,7 +29,10 @@ analyze_requirements() {
     local requirements_file="$1"
     local analysis_file="$ARTIFACTS_DIR/analysis/requirements_analysis.json"
     
-    echo "[$AGENT_ID] Analyzing requirements document: $requirements_file"
+    echo "[$AGENT_ID] Analyzing requirements document: $requirements_file" >&2
+    
+    # Ensure directory exists
+    mkdir -p "$(dirname "$analysis_file")"
     
     # Read and process requirements
     local requirements_content
@@ -67,7 +70,7 @@ analyze_requirements() {
 }
 EOF
     
-    echo "[$AGENT_ID] Requirements analysis completed: $analysis_file"
+    echo "[$AGENT_ID] Requirements analysis completed: $analysis_file" >&2
     echo "$analysis_file"
 }
 
@@ -508,7 +511,10 @@ create_dynamic_task_plan() {
     local agents_config="$2"
     local task_plan_file="$ARTIFACTS_DIR/plans/dynamic_task_plan.json"
     
-    echo "[$AGENT_ID] Creating dynamic task plan based on analysis"
+    echo "[$AGENT_ID] Creating dynamic task plan based on analysis" >&2
+    
+    # Ensure directory exists
+    mkdir -p "$(dirname "$task_plan_file")"
     
     # Read analysis results
     local analysis
@@ -769,7 +775,7 @@ create_dynamic_task_plan() {
 }
 EOF
     
-    echo "[$AGENT_ID] Dynamic task plan created: $task_plan_file"
+    echo "[$AGENT_ID] Dynamic task plan created: $task_plan_file" >&2
     echo "$task_plan_file"
 }
 
@@ -1211,9 +1217,9 @@ main() {
 }
 EOF
     
-    echo "[$AGENT_ID] Intelligent planning completed successfully"
-    echo "[$AGENT_ID] Analysis: $analysis_file"
-    echo "[$AGENT_ID] Task Plan: $task_plan_file"
+    echo "[$AGENT_ID] Intelligent planning completed successfully" >&2
+    echo "[$AGENT_ID] Analysis: $analysis_file" >&2
+    echo "[$AGENT_ID] Task Plan: $task_plan_file" >&2
 }
 
 # Execute main function

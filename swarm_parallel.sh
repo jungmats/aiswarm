@@ -154,8 +154,14 @@ main() {
     AGENTS_CONFIG=""
     SPEC_FILE=""
     
+    echo "DEBUG: main() called with args: $*" >&2
+    
     # Parse arguments
     parse_arguments "$@"
+    
+    echo "DEBUG: After parsing - AGENTS_CONFIG='$AGENTS_CONFIG'" >&2
+    echo "DEBUG: After parsing - SPEC_FILE='$SPEC_FILE'" >&2
+    echo "DEBUG: After parsing - PARALLEL_MODE='$PARALLEL_MODE'" >&2
     
     # Show usage if insufficient arguments
     if [[ -z "${AGENTS_CONFIG:-}" || -z "${SPEC_FILE:-}" ]]; then
@@ -188,6 +194,7 @@ main() {
     
     if [[ "$PARALLEL_MODE" == "true" ]]; then
         # Use parallel execution
+        echo "DEBUG: About to call execute_swarm_parallel with AGENTS_CONFIG='$AGENTS_CONFIG'" >&2
         source "${SCRIPT_DIR}/lib/parallel_executor.sh"
         start_execution_monitor
         execute_swarm_parallel "$AGENTS_CONFIG"
